@@ -1,1 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart Horse Feeding System</title>
+
+<style>
+/* ---------- GLOBAL ---------- */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+}
+
+h2, h3 {
+  margin-top: 0;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ---------- LAYOUT ---------- */
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+/* ---------- LEFT PANEL ---------- */
+.left-panel {
+  width: 30%;
+  background: #1f2933;
+  color: white;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.left-panel input {
+  width: 100%;
+  padding: 6px;
+  margin-bottom: 6px;
+}
+
+.horse-item {
+  padding: 8px;
+  background: #374151;
+  margin-bottom: 6px;
+  border-radius: 4px;
+}
+
+.horse-item:hover {
+  background: #4b5563;
+}
+
+/* ---------- RIGHT PANEL ---------- */
+.right-panel {
+  width: 70%;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.table th, .table td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: center;
+}
+
+.table th {
+  background: #e5e7eb;
+}
+
+/* ---------- PROFILE ---------- */
+.profile {
+  background: white;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+}
+
+/* ---------- HISTORY ---------- */
+.history {
+  background: white;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  .left-panel, .right-panel {
+    width: 100%;
+    height: auto;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <h3>Horses</h3>
+    <input id="horseName" placeholder="Add horse name" />
+    <button onclick="addHorse()">Add Horse</button>
+    <div id="horseList"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <h2 id="selectedHorse">Select a horse</h2>
+
+    <!-- FEEDING TABLE -->
+    <table class="table">
+      <tr>
+        <th>Food Type</th>
+        <th>Quantity (kg)</th>
+        <th>Feeding Time</th>
+        <th>Feed</th>
+      </tr>
+      <tr>
+        <td><input id="foodType"></td>
+        <td><input id="foodQty" type="number"></td>
+        <td><input id="foodTime" type="time"></td>
+        <td><button onclick="feedHorse()">Feed</button></td>
+      </tr>
+    </table>
+
+    <!-- PROFILE -->
+    <div class="profile">
+      <h3>Horse Profile</h3>
+      <label>Weight (kg):</label>
+      <input id="weight"><br><br>
+      <label>Height (cm):</label>
+      <input id="height"><br><br>
+      <label>Traits / Markings:</label>
+      <input id="traits"><br><br>
+      <button onclick="saveProfile()">Save Profile</button>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="history">
+      <h3>Feeding History</h3>
+      <ul id="historyList"></ul>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let horses = {};
+let currentHorse = null;
+
+function addHorse() {
+  const name = document.getElementById("horseName").value;
+  if (!name) return;
+
+  horses[name] = {
+    profile: {},
+    history: []
+  };
+
+  document.getElementById("horseName").value = "";
+  renderHorses();
+}
+
+function renderHorses() {
+  const list = document.getElementById("horseList");
+  list.innerHTML = "";
+  Object.keys(horses).forEach(horse => {
+    const div = document.createElement("div");
+    div.className = "horse-item";
+    div.innerText = horse;
+    div.onclick = () => selectHorse(horse);
+    list.appendChild(div);
+  });
+}
+
+function selectHorse(name) {
+  currentHorse = name;
+  document.getElementById("selectedHorse").innerText = name;
+
+  const profile = horses[name].profile;
+  document.getElementById("weight").value = profile.weight || "";
+  document.getElementById("height").value = profile.height || "";
+  document.getElementById("traits").value = profile.traits || "";
+
+  renderHistory();
+}
+
+function saveProfile() {
+  if (!currentHorse) return;
+  horses[currentHorse].profile = {
+    weight: document.getElementById("weight").value,
+    height: document.getElementById("height").value,
+    traits: document.getElementById("traits").value
+  };
+  alert("Profile saved");
+}
+
+function feedHorse() {
+  if (!currentHorse) return;
+
+  const time = new Date().toLocaleTimeString();
+  horses[currentHorse].history.push(time);
+  renderHistory();
+
+  /* Placeholder for ESP32 WiFi / Bluetooth control
+     In real implementation:
+     - Send feeding command to dispenser
+     - Receive confirmation
+  */
+
+  alert("Horse fed at " + time);
+}
+
+function renderHistory() {
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+  horses[currentHorse].history.forEach(h => {
+    const li = document.createElement("li");
+    li.innerText = h;
+    list.appendChild(li);
+  });
+}
+</script>
+
+</body>
+</html>
 
